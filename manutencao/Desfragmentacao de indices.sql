@@ -1,0 +1,110 @@
+DECLARE @NOMEBANCO VARCHAR(100);
+DECLARE @NOMETABELA VARCHAR(100);
+DECLARE @TABELAEXISTE smallint;
+DECLARE @VALORMINIMO FLOAT; -- valor minimo de fragmentacao
+DECLARE @NOMEINDICE VARCHAR(100);
+DECLARE @FRAGMENTACAO NUMERIC(15,5);
+DECLARE @CHAVE INT;
+DECLARE @SOMENTECONSULTA INT;
+DECLARE @NOMES TABLE  (CHAVE INT, NOMETABELA VARCHAR(100), TABELAEXISTE SMALLINT, NOMEINDICE VARCHAR(100), FRAGMENTACAO NUMERIC(15,5));
+DECLARE @NOME VARCHAR(50);
+
+DECLARE @TOTAL SMALLINT = 0;
+DECLARE @CONT SMALLINT = 0;
+
+SET NOCOUNT ON
+
+-- SETAR PARAMETROS
+SELECT @NOMEBANCO=DB_NAME();
+
+SET @VALORMINIMO=0; -- Porcentagem de fragmentação
+
+DECLARE C_NOMETABELA CURSOR FOR 
+SELECT
+distinct
+t.NAME 
+FROM
+sys.tables t
+INNER JOIN sys.indexes i ON (t.OBJECT_ID = i.object_id)
+INNER JOIN sys.partitions p ON (i.object_id = p.OBJECT_ID AND i.index_id = p.index_id)
+INNER JOIN sys.allocation_units a ON (p.partition_id = a.container_id)
+LEFT OUTER JOIN sys.schemas s ON (t.schema_id = s.schema_id)
+WHERE
+t.is_ms_shipped = 0
+and t.NAME NOT LIKE 'dt%' 
+AND i.OBJECT_ID > 255
+OPEN C_NOMETABELA;
+
+SELECT @TOTAL=COUNT(A.NAME) FROM (SELECT
+t.NAME 
+FROM
+sys.tables t
+INNER JOIN sys.indexes i ON (t.OBJECT_ID = i.object_id)
+INNER JOIN sys.partitions p ON (i.object_id = p.OBJECT_ID AND i.index_id = p.index_id)
+INNER JOIN sys.allocation_units a ON (p.partition_id = a.container_id)
+LEFT OUTER JOIN sys.schemas s ON (t.schema_id = s.schema_id)
+WHERE
+t.is_ms_shipped = 0
+and t.NAME NOT LIKE 'dt%' 
+AND i.OBJECT_ID > 255
+GROUP BY
+t.Name, s.Name, p.Rows) A;
+
+FETCH NEXT FROM C_NOMETABELA INTO @NOMETABELA;
+WHILE @@FETCH_STATUS=0
+BEGIN
+	 --WAITFOR DELAY '00:00:10';
+
+	SET @CONT= @CONT+1;
+
+	-- PRINT  'Reindexando objetos de '+@NOMETABELA+' ('+CAST(@CONT AS VARCHAR)+'/'+CAST(@TOTAL AS VARCHAR)+')';
+	-- DBCC DBREINDEX (@NOMETABELA, '', 70); 
+
+	SELECT
+		@NOME=i.name 
+	FROM
+	sys.dm_db_index_physical_stats(DB_ID(@NOMEBANCO), OBJECT_ID(@NOMETABELA), NULL, NULL, NULL) phystat 
+	INNER JOIN sys.indexes i ON (i.OBJECT_ID = phystat.OBJECT_ID AND i.index_id = phystat.index_id)
+	WHERE 
+	phystat.avg_fragmentation_in_percent >= @VALORMINIMO 
+	AND OBJECT_ID(@NOMETABELA) IS NOT NULL;
+
+	DECLARE C_ESTATISTICA CURSOR FOR
+	SELECT
+	i.name,
+	avg_fragmentation_in_percent
+	FROM
+	sys.dm_db_index_physical_stats(DB_ID(@NOMEBANCO), OBJECT_ID(@NOMETABELA), NULL, NULL, NULL) phystat 
+	INNER JOIN sys.indexes i ON (i.OBJECT_ID = phystat.OBJECT_ID AND i.index_id = phystat.index_id)
+	WHERE 
+	phystat.avg_fragmentation_in_percent >= @VALORMINIMO 
+	AND OBJECT_ID(@NOMETABELA) IS NOT NULL;
+	OPEN C_ESTATISTICA;
+
+	SET @CHAVE=0
+
+	FETCH NEXT FROM C_ESTATISTICA INTO @NOMEINDICE, @FRAGMENTACAO;
+	WHILE @@FETCH_STATUS=0
+	BEGIN
+		SET @CHAVE=@CHAVE+1;
+		INSERT INTO @NOMES (CHAVE, NOMETABELA, TABELAEXISTE, NOMEINDICE, FRAGMENTACAO)
+		VALUES (@CHAVE, @NOMETABELA, 1, @NOMEINDICE, @FRAGMENTACAO);
+
+		PRINT  'Desfragmentando índices da tabela ('+CAST(@CONT AS VARCHAR)+'/'+CAST(@TOTAL AS VARCHAR)+'): '+
+		@NOMETABELA + '.'+@NOMEINDICE+'...';
+		DBCC INDEXDEFRAG (@NOMEBANCO, @NOMETABELA, @NOMEINDICE);
+
+
+		FETCH NEXT FROM C_ESTATISTICA INTO @NOMEINDICE, @FRAGMENTACAO;
+	END
+
+	CLOSE C_ESTATISTICA;
+	DEALLOCATE C_ESTATISTICA;
+	
+	FETCH NEXT FROM C_NOMETABELA INTO @NOMETABELA;
+END
+
+CLOSE C_NOMETABELA;
+DEALLOCATE C_NOMETABELA;
+
+print 'concluido';
