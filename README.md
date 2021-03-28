@@ -8,15 +8,15 @@ Agora, sobre os diretórios.
 
 1) Diretorio "manutencao":
 Há scripts diversos que nos auxiliam em:
-# Saber conexões em aberto
-# Desfragmentar objetos de banco de daods
-# Reindexação
-# Saber Querys mais pesadas
-# Saber de cada tabela no banco, qual a quantidade de registros
-# Script para saber log de restauração de banco de dados
-# Simulador do "for update no wait" do Oracle, no SQL Server
-# Indicador de indices faltantes ou sem utilização
-# Limpeza de log e Cache
+* Saber conexões em aberto
+* Desfragmentar objetos de banco de daods
+* Reindexação
+* Saber Querys mais pesadas
+* Saber de cada tabela no banco, qual a quantidade de registros
+* Script para saber log de restauração de banco de dados
+* Simulador do "for update no wait" do Oracle, no SQL Server
+* Indicador de indices faltantes ou sem utilização
+* Limpeza de log e Cache
 
 2) Diretorio "separacao objetos em varios filegroups":
 Sabemos que  a operação de utilizar arquivo de disco é uma operação bloqueante. Ou seja, não importa a capacidade
@@ -36,9 +36,9 @@ No meu exemplo, eu separei filegroups divididos em trimestres e, nele, criei uma
 Assim, podemos pegar qualquer tabela do sistema e, aplicar o determinado particionamento.
 
 Todos estes exemplos apresentados funcionam em produção e, possibilitou:
-# Aumento da performance do sistema em produção
-# Facilitou o backup e o restore
-# Diminuição da necessidade de fazer desfragmentação 
+* Aumento da performance do sistema em produção
+* Facilitou o backup e o restore
+* Diminuição da necessidade de fazer desfragmentação 
 
 Espero ter ajudado.
 
