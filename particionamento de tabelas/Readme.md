@@ -5,7 +5,7 @@
 ** O usuário deixei como sa mas, pode ser que mude
 
 
-* Deve ser criado uma tabela, chamado TABELASISTEMA, onde mencionaremos as tabelas que existem e quais os FileGroups especifico
+* Deve ser criado uma tabela, chamado CONFIGTAB, onde mencionaremos as tabelas que existem e quais os FileGroups especifico
 ** O Arquivo Passo01 - Preparar Tabelas x FileGroup.sql mencionamos isso
  
 

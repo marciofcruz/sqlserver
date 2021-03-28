@@ -40,6 +40,20 @@ Todos estes exemplos apresentados funcionam em produção e, possibilitou:
 * Facilitou o backup e o restore
 * Diminuição da necessidade de fazer desfragmentação 
 
+Observação importante: É necessário ter 2 tabelas no banco auxilar. E, para isso, rodar o comando.
+    create table COMANDODDL (
+        id INT NOT NULL IDENTITY (1,1) PRIMARY KEY,
+		TIPO SMALLINT, -- 0-ELIMINAR CONTRAINT FK, 1-ELIMINAR PK, 2,-CRIAR PK, 3-ELIMINAR FK, 4-CRIAR FK, 5 - CRIAR CONSTRAINT FK
+		SQL NVARCHAR(MAX)    
+	)
+
+	    create table CONFIGTAB (
+        id INT NOT NULL IDENTITY (1,1) PRIMARY KEY,
+		NOMETABELA VARCHAR(200),
+		FUNCAOPARTICAO VARCHAR(200),
+		NOMEFILEGROUP VARCHAR(200)
+	)
+
 Espero ter ajudado.
 
 Marcio
