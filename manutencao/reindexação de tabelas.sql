@@ -56,7 +56,7 @@ BEGIN
 	PRINT  'Reindexando objetos de '+@NOMETABELA+' ('+CAST(@CONT AS VARCHAR)+'/'+CAST(@TOTAL AS VARCHAR)+')';
 	DBCC DBREINDEX (@NOMETABELA); 
 
-	WAITFOR DELAY '00:00:10';
+	--WAITFOR DELAY '00:00:10'; para destravar o uso do sistema para a produção
 	
 	FETCH NEXT FROM C_NOMETABELA INTO @NOMETABELA;
 END
