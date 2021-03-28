@@ -6,7 +6,7 @@ devem espelhar os módulos que um sistema tem, assim, fica mais fácil o entendi
 
 Agora, sobre os diretórios.
 
-1) Diretorio "manutencao":
+# Diretorio "manutencao":
 Há scripts diversos que nos auxiliam em:
 * Saber conexões em aberto
 * Desfragmentar objetos de banco de daods
@@ -18,7 +18,7 @@ Há scripts diversos que nos auxiliam em:
 * Indicador de indices faltantes ou sem utilização
 * Limpeza de log e Cache
 
-2) Diretorio "separacao objetos em varios filegroups":
+# Diretorio "separacao objetos em varios filegroups":
 Sabemos que  a operação de utilizar arquivo de disco é uma operação bloqueante. Ou seja, não importa a capacidade
 computacional, etc, o acesso ao disco é sempre bloqueante e se tiver mais de um usuário esperando ao mesmo tempo.
 
@@ -28,7 +28,7 @@ configurado mais).
 Assim, pode-se aplicar o algoritimo "proportional fill", além do mais, possibilitar que o SGBD do SQL Server
 utilize o poder do multicore.
 
-3) Diretório "particionamento de tabelas":
+# Diretório "particionamento de tabelas":
 Sempre há no sistema aquelas tabelas gigantes. Assim,  este script é uma sequência de comandos que pega determinadas tabelas do sistema e aplicamos particionamento de acordo
 com parâmetros, por exemplo a data.
 
@@ -41,6 +41,7 @@ Todos estes exemplos apresentados funcionam em produção e, possibilitou:
 * Diminuição da necessidade de fazer desfragmentação 
 
 Observação importante: É necessário ter 2 tabelas no banco auxilar. E, para isso, rodar o comando.
+
     create table COMANDODDL (
         id INT NOT NULL IDENTITY (1,1) PRIMARY KEY,
 		TIPO SMALLINT, -- 0-ELIMINAR CONTRAINT FK, 1-ELIMINAR PK, 2,-CRIAR PK, 3-ELIMINAR FK, 4-CRIAR FK, 5 - CRIAR CONSTRAINT FK
